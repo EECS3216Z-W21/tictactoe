@@ -1,9 +1,9 @@
 // Code adapted from DE-10 Lite demonstration code.
-// Modified by Adam Silverman and Tuan Dau, 2020.
+// Modified by Adam Silverman, 2021.
 
 module vga_controller(iRST_n,
                       iVGA_CLK,
-							 distance,
+					  board,
                       oBLANK_n,
                       oHS,
                       oVS,
@@ -12,7 +12,7 @@ module vga_controller(iRST_n,
                       oVGA_R);
 input iRST_n;
 input iVGA_CLK;
-input [31:0] distance;
+input reg [1:0] board [8:0]
 output reg oBLANK_n;
 output reg oHS;
 output reg oVS;
@@ -45,14 +45,13 @@ reg [3:0] red;
 reg [3:0] blue;
 reg [3:0] green;
 
-// Reuse 7seg decoders for distance - construct segments to display
-wire [6:0] hundreds;
-wire [6:0] tens;
-wire [6:0] ones;
+parameter LEFT_EDGE = 150;
+parameter TOP_EDGE = 70;
+parameter LINE_WIDTH = 10;
+parameter CELL_WIDTH = 100;
 
-seg7 s0(distance % 10, ones);
-seg7 s1((distance % 100) / 10, tens);
-seg7 s2((distance % 1000) / 100, hundreds);
+parameter RIGHT_EDGE = LEFT_EDGE + 4*LINE_WIDTH + 3*CELL_WIDTH;
+parameter BOTTOM_EDGE = TOP_EDGE + 4*LINE_WIDTH + 3*CELL_WIDTH;
 
 always@(posedge iVGA_CLK)
 begin
@@ -62,100 +61,179 @@ begin
 		blue <= 4'h0;
 	end else begin
 		if (cBLANK_n == 1'b1) begin
-			// Hundreds digit
-			if (col > 90 && col < 150 && row >= 150 && row <= 170 && ~hundreds[0]) begin
+			// Board lines
+			if (col >= LEFT_EDGE && col < LEFT_EDGE + LINE_WIDTH && row >= TOP_EDGE && row < BOTTOM_EDGE) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col > 90 && col < 150 && row >= 230 && row <= 250 && ~hundreds[6]) begin
+			end else if (col >= LEFT_EDGE + LINE_WIDTH + CELL_WIDTH && col < LEFT_EDGE + 2*LINE_WIDTH + CELL_WIDTH && row >= TOP_EDGE && row < BOTTOM_EDGE) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col > 90 && col < 150 && row >= 310 && row <= 330 && ~hundreds[3]) begin
+			end else if (col >= LEFT_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH && col < LEFT_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && row >= TOP_EDGE && row < BOTTOM_EDGE) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col >= 70 && col <= 90 && row >= 150 && row <= 240 && ~hundreds[5]) begin
+			end else if (col >= LEFT_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH && col < LEFT_EDGE + 4*LINE_WIDTH + 3*CELL_WIDTH && row >= TOP_EDGE && row < BOTTOM_EDGE) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col >= 70 && col <= 90 && row > 240 && row <= 330 && ~hundreds[4]) begin
+			end else if (col >= LEFT_EDGE && col < RIGHT_EDGE && row >= TOP_EDGE && row < TOP_EDGE + LINE_WIDTH) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col >= 150 && col <= 170 && row >= 150 && row <= 240 && ~hundreds[1]) begin
+			end else if (col >= LEFT_EDGE && col < RIGHT_EDGE && row >= TOP_EDGE + LINE_WIDTH + CELL_WIDTH && row < TOP_EDGE + 2*LINE_WIDTH + CELL_WIDTH) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end else if (col >= 150 && col <= 170 && row > 240 && row <= 330 && ~hundreds[2]) begin
+			end else if (col >= LEFT_EDGE && col < RIGHT_EDGE && row >= TOP_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH && row < TOP_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
-			end
-			
-			// Tens digit
-			else if (col > 250 && col < 310 && row >= 150 && row <= 170 && ~tens[0]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col > 250 && col < 310 && row >= 230 && row <= 250 && ~tens[6]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col > 250 && col < 310 && row >= 310 && row <= 330 && ~tens[3]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 230 && col <= 250 && row >= 150 && row <= 240 && ~tens[5]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 230 && col <= 250 && row > 240 && row <= 330 && ~tens[4]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 310 && col <= 330 && row >= 150 && row <= 240 && ~tens[1]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 310 && col <= 330 && row > 240 && row <= 330 && ~tens[2]) begin
+			end else if (col >= LEFT_EDGE && col < RIGHT_EDGE && row >= TOP_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH && row < TOP_EDGE + 4*LINE_WIDTH + 3*CELL_WIDTH) begin
 				red <= 4'hf;
 				green <= 4'hf;
 				blue <= 4'hf;
 			end
 			
-			// Ones digit
-			else if (col > 410 && col < 470 && row >= 150 && row <= 170 && ~ones[0]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col > 410 && col < 470 && row >= 230 && row <= 250 && ~ones[6]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col > 410 && col < 470 && row >= 310 && row <= 330 && ~ones[3]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 390 && col <= 410 && row >= 150 && row <= 240 && ~ones[5]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 390 && col <= 410 && row > 240 && row <= 330 && ~ones[4]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 470 && col <= 490 && row >= 150 && row <= 240 && ~ones[1]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
-			end else if (col >= 470 && col <= 490 && row > 240 && row <= 330 && ~ones[2]) begin
-				red <= 4'hf;
-				green <= 4'hf;
-				blue <= 4'hf;
+			// Cells, in order
+			// 0 1 2
+			// 3 4 5
+			// 6 7 8
+			
+			//00 => unoccupied
+			//01 => unused
+			//10 => player 1
+			//11 => player 2
+			else if (col >= LEFT_EDGE + LINE_WIDTH && col < LEFT_EDGE + LINE_WIDTH + CELL_WIDTH && row >= TOP_EDGE + LINE_WIDTH && row < TOP_EDGE + LINE_WIDTH + CELL_WIDTH) begin
+				if (board[0] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[0] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[0] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 2*LINE_WIDTH + CELL_WIDTH && col < LEFT_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH && row >= TOP_EDGE + LINE_WIDTH && row < TOP_EDGE + LINE_WIDTH + CELL_WIDTH) begin
+				if (board[1] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[1] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[1] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && col < LEFT_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH && row >= TOP_EDGE + LINE_WIDTH && row < TOP_EDGE + LINE_WIDTH + CELL_WIDTH) begin
+				if (board[2] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[2] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[2] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + LINE_WIDTH && col < LEFT_EDGE + LINE_WIDTH + CELL_WIDTH && row >= TOP_EDGE + 2*LINE_WIDTH + CELL_WIDTH && row < TOP_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH) begin
+				if (board[3] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[3] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[3] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 2*LINE_WIDTH + CELL_WIDTH && col < LEFT_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH && row >= TOP_EDGE + 2*LINE_WIDTH + CELL_WIDTH && row < TOP_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH) begin
+				if (board[4] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[4] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[4] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && col < LEFT_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH && row >= TOP_EDGE + 2*LINE_WIDTH + CELL_WIDTH && row < TOP_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH) begin
+				if (board[5] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[5] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[5] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + LINE_WIDTH && col < LEFT_EDGE + LINE_WIDTH + CELL_WIDTH && row >= TOP_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && row < TOP_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH) begin
+				if (board[6] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[6] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[6] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 2*LINE_WIDTH + CELL_WIDTH && col < LEFT_EDGE + 2*LINE_WIDTH + 2*CELL_WIDTH && row >= TOP_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && row < TOP_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH) begin
+				if (board[7] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[7] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[7] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
+			end else if (col >= LEFT_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && col < LEFT_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH && row >= TOP_EDGE + 3*LINE_WIDTH + 2*CELL_WIDTH && row < TOP_EDGE + 3*LINE_WIDTH + 3*CELL_WIDTH) begin
+				if (board[8] == 2'b00) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[8] == 2'b10) begin
+					red <= 4'h7;
+					green <= 4'h0;
+					blue <= 4'h0;
+				end else if (board[8] == 2'b11) begin
+					red <= 4'h0;
+					green <= 4'h0;
+					blue <= 4'h7;
+				end
 			end
 			
-			// Default colour
+			// Default background colour
 			else begin
 				red <= 4'h0;
 				green <= 4'h7;
