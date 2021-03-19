@@ -80,6 +80,8 @@ module main(clk, select, rst, move);
 	
 		// frame rate related logic
 		counter <= counter + 1;
+
+		pr_state <= nx_state;
 		if (counter >= clocks_per_frame) begin
 			counter <= 0;
 			
