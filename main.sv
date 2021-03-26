@@ -2,12 +2,14 @@
 module main(
 	// , output logic z
 	input MAX10_CLK1_50,
-   input KEY[2],
-   output [3:0] VGA_B, VGA_G, VGA_R,
-   output VGA_HS, VGA_VS,
+   	input KEY[2],
+   	output [3:0] VGA_B, VGA_G, VGA_R,
+   	output VGA_HS, VGA_VS,
 	input select, rst,
-	input reg [8:0]move
-);
+	input reg [8:0]move,
+    output [6:0] out1,
+    output [6:0] out2
+    );
 
 	//Part 2: Declarations:
 
@@ -15,9 +17,6 @@ module main(
 	typedef enum logic [2:0] {play, checkMove, checkWin, p1Win, p2Win, tie, reset} state;
 	
 	state pr_state, nx_state;
-
-	// functions used
-	// check_input(location[8:0], board, isValid);
 
 
 	//this is a board made of 9 2-bit spaces 
@@ -39,8 +38,10 @@ module main(
 	//0 => player 1
 	//1 => player 2
 
-	reg [8:0] location; //this is the location a player is making a move to
 	wire [1:0] winner; //output of checkWin
+
+    reg [4:0] wincounter1 = 5'd0;
+	reg [4:0] wincounter2 = 5'd0;
 
 	//TODO - RESET BUTTON TIMER LOGIC
 	//Timer-related declarations:
@@ -101,10 +102,10 @@ module main(
 					//check valid location
 					if(is_valid(move, board)) begin 
 						if(player == 0) begin
-							board[nine_to_four(location)] <= '{2'b01};
+							board[nine_to_four(move)] <= '{2'b01};
 						end
 						else begin
-							board[nine_to_four(location)] <= '{2'b10};
+							board[nine_to_four(move)] <= '{2'b10};
 						end
 						nx_state <= checkWin;
 					end
@@ -130,15 +131,15 @@ module main(
 					endcase 
 				end
 				p1Win: begin
-					 //player 1 wins
-					 
-					 //-> reset board
+					//player 1 wins
+					wincounter1 <= wincounter1 + 1'b1;
+					//-> reset board
 					nx_state <= reset;
 				end
 				p2Win: begin
-					 //player 2 wins
-					 
-					 //-> reset board
+					//player 2 wins
+					 wincounter2 <= wincounter2 + 1'b1;
+					//-> reset board
 					nx_state <= reset;
 				end
 				tie: begin
@@ -149,6 +150,11 @@ module main(
 				end
 				reset: begin
 					//reset board
+                    if (wincounter1 >= 5'd9 || wincounter2 >= 5'd9)
+						begin
+						    wincounter1 <= 1'b0;
+							wincounter2 <= 1'b0;
+						end
 			 
 					//back to play
 					nx_state <= play;
@@ -157,27 +163,25 @@ module main(
 		end
 	end
 	
-// VGA
-wire VGA_CTRL_CLK;
-                   
-vga_pll u1(
-   .areset(),
-   .inclk0(MAX10_CLK1_50),
-   .c0(VGA_CTRL_CLK),
-   .locked());
+    // VGA
+    wire VGA_CTRL_CLK;
+                    
+    vga_pll u1(
+    .areset(),
+    .inclk0(MAX10_CLK1_50),
+    .c0(VGA_CTRL_CLK),
+    .locked());
 
-   
-vga_controller vga_ins(.iRST_n(KEY[0]),
-                      .iVGA_CLK(VGA_CTRL_CLK),
-                      .board(board),
-                      .oHS(VGA_HS),
-                      .oVS(VGA_VS),
-                      .oVGA_B(VGA_B),
-                      .oVGA_G(VGA_G),
-                      .oVGA_R(VGA_R)); 
-                             
-                         
-endmodule 
+    
+    vga_controller vga_ins(.iRST_n(KEY[0]),
+                        .iVGA_CLK(VGA_CTRL_CLK),
+                        .board(board),
+                        .oHS(VGA_HS),
+                        .oVS(VGA_VS),
+                        .oVGA_B(VGA_B),
+                        .oVGA_G(VGA_G),
+                        .oVGA_R(VGA_R)); 
 
-// if ({x,y} == 2’b01) begin z=1’b1; nx_state <= B; end
-// else begin z=1’b0; nx_state <= A; end
+    SSLED(wincounter1, out1); // player 1
+    SSLED(wincounter2, out2); // player 2                       
+endmodule
