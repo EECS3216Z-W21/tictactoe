@@ -1,9 +1,13 @@
 //Part 1: Module header:
-module main(clk, select, rst, move);
+module main(
 	// , output logic z
-	
-	input clk, select, rst;
-	input reg [8:0]move;
+	input MAX10_CLK1_50,
+   input KEY[2],
+   output [3:0] VGA_B, VGA_G, VGA_R,
+   output VGA_HS, VGA_VS,
+	input select, rst,
+	input reg [8:0]move
+);
 
 	//Part 2: Declarations:
 
@@ -54,7 +58,7 @@ module main(clk, select, rst, move);
 	// 1000 hz rst polling
 	reg [31:0] button_counter = 32'd0;
 	parameter polling_rate = frequency/1000;
-	always @(posedge clk) begin
+	always @(posedge MAX10_CLK1_50) begin
 		button_counter <= button_counter + 1;
 		// negedge triggering the rst doesn't work too well
 		// better to simply poll every ms and let the state transition
@@ -152,6 +156,27 @@ module main(clk, select, rst, move);
 			endcase	
 		end
 	end
+	
+// VGA
+wire VGA_CTRL_CLK;
+                   
+vga_pll u1(
+   .areset(),
+   .inclk0(MAX10_CLK1_50),
+   .c0(VGA_CTRL_CLK),
+   .locked());
+
+   
+vga_controller vga_ins(.iRST_n(KEY[0]),
+                      .iVGA_CLK(VGA_CTRL_CLK),
+                      .board(board),
+                      .oHS(VGA_HS),
+                      .oVS(VGA_VS),
+                      .oVGA_B(VGA_B),
+                      .oVGA_G(VGA_G),
+                      .oVGA_R(VGA_R)); 
+                             
+                         
 endmodule 
 
 // if ({x,y} == 2’b01) begin z=1’b1; nx_state <= B; end
