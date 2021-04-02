@@ -65,13 +65,16 @@ module main(
 	// 1000 hz rst polling
 	reg [31:0] button_counter = 32'd0;
 	parameter polling_rate = frequency/1000;
+
+	reg is_valid = 1'b0;
+	reg [3:0] nine_to_four = 4'b0;
+	reg [1:0] check_win = 2'b0;
 	always @(posedge MAX10_CLK1_50) begin
 		button_counter <= button_counter + 1;
 		// negedge triggering the rst doesn't work too well
 		// better to simply poll every ms and let the state transition
 		// at the next frame
-		
-		$display("player 1");
+	
 		if(button_counter >= polling_rate) begin
 			if(!rst) begin
 				button_counter <= 0;
@@ -93,6 +96,114 @@ module main(
 	
 		// frame rate related logic
 		counter <= counter + 1;
+		
+		
+		if(move == 9'b000000001) begin
+			nine_to_four <= 4'b0000;
+		end
+		else if(move == 9'b000000010) begin
+			nine_to_four <= 4'b0001;
+		end
+		else if(move == 9'b000000100) begin
+			nine_to_four <= 4'b0010;
+		end
+		else if(move == 9'b000001000) begin
+			nine_to_four <= 4'b0011;
+		end
+		else if(move == 9'b000010000) begin
+			nine_to_four <= 4'b0100;
+		end
+		else if(move == 9'b000100000) begin
+			nine_to_four <= 4'b0101;
+		end
+		else if(move == 9'b001000000) begin
+			nine_to_four <= 4'b0110;
+		end
+		else if(move == 9'b010000000) begin
+			nine_to_four <= 4'b0111;
+		end
+		else if(move == 9'b100000000) begin
+			nine_to_four <= 4'b1000;
+		end
+		
+		
+		
+		// 00 <= nobody won
+		// 01 <= player 1 win
+		// 10 <= player 2 win
+		// 11 <= tie
+
+		if( board[0] !== 00 && board[1] !== 00 && board[2] !== 00 &&
+			 board[3] !== 00 && board[4] !== 00 && board[5] !== 00 &&
+			 board[6] !== 00 && board[7] !== 00 && board[8] !== 00 )
+			 begin
+					check_win <= 2'b11;
+			 end
+		else if(board[0] !== 00 && board[0] == board[1] && board[1] == board[2])
+			 begin
+				  check_win <= board[0];
+			 end
+		else if (board[3] !== 00 && board[3] == board[4] && board[4] == board[5])
+			 begin
+					check_win <= board[3];
+			 end
+		else if (board[6] !== 00 && board[6] == board[7] && board[7] == board[8])
+			 begin
+					check_win <= board[6];
+			 end
+		else if (board[0] !== 00 && board[0] == board[3] && board[3] == board[6])
+			 begin
+					check_win <= board[0];
+			 end
+		else if (board[1] !== 00 && board[1] == board[4] && board[4] == board[7])
+			 begin
+					check_win <= board[1];
+			 end
+		else if (board[2] !== 00 && board[2] == board[5] && board[5] == board[8])
+			 begin
+					check_win <= board[2];
+			 end
+		else if (board[0] !== 00 && board[0] == board[4] && board[4] == board[8])
+			 begin
+					check_win <= board[0];
+			 end
+		else if (board[2] !== 00 && board[2] == board[4] && board[4] == board[6])
+			 begin
+					check_win <= board[2];
+			 end
+			 
+			 
+		if(move == 9'b000000001) begin
+			is_valid <= board[0] == 2'b00;
+		end
+		else if(move == 9'b000000010) begin
+			is_valid <= board[1] == 2'b00;
+		end
+		else if(move == 9'b000000100) begin
+			is_valid <= board[2] == 2'b00;
+		end
+		else if(move == 9'b000001000) begin
+			is_valid <= board[3] == 2'b00;
+		end
+		else if(move == 9'b000010000) begin
+			is_valid <= board[4] == 2'b00;
+		end
+		else if(move == 9'b000100000) begin
+			is_valid <= board[5] == 2'b00;
+		end
+		else if(move == 9'b001000000) begin
+			is_valid <= board[6] == 2'b00;
+		end
+		else if(move == 9'b010000000) begin
+			is_valid <= board[7] == 2'b00;
+		end
+		else if(move == 9'b100000000) begin
+			is_valid <= board[8] == 2'b00;
+		end
+		else begin
+			is_valid <= 0;
+		end
+
 
 		pr_state <= nx_state;
 		if (counter >= clocks_per_frame) begin
@@ -108,15 +219,16 @@ module main(
 				end
 				checkMove: begin
 					//check valid location
-					if(is_valid(move, board)) begin 
+					if (is_valid) begin 
 						if(player == 0) begin
-							board[nine_to_four(move)] <= '{2'b01};
+							board[nine_to_four] <= '{2'b01};
 						end
 						else begin
-							board[nine_to_four(move)] <= '{2'b10};
+							board[nine_to_four] <= '{2'b10};
 						end
 						player <= 1 - player;
 						nx_state <= checkWin;
+
 					end
 				end
 				checkWin: begin
@@ -124,7 +236,7 @@ module main(
 				 
 					//if not win, keep play
 					//if win, go to respective win state
-					case(check_win(board))
+					case(check_win)
 						2'b00: begin
 							nx_state <= play;
 						end
