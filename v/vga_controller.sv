@@ -102,19 +102,19 @@ begin
 			// 6 7 8
 			
 			//00 => unoccupied
-			//01 => unused
-			//10 => player 1
-			//11 => player 2
+			//01 => player 1
+			//10 => player 2
+			//11 => unused
 			else if (col >= LEFT_EDGE + LINE_WIDTH && col < LEFT_EDGE + LINE_WIDTH + CELL_WIDTH && row >= TOP_EDGE + LINE_WIDTH && row < TOP_EDGE + LINE_WIDTH + CELL_WIDTH) begin
 				if (board[0] == 2'b00) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[0] == 2'b10) begin
+				end else if (board[0] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[0] == 2'b11) begin
+				end else if (board[0] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -124,11 +124,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[1] == 2'b10) begin
+				end else if (board[1] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[1] == 2'b11) begin
+				end else if (board[1] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -138,11 +138,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[2] == 2'b10) begin
+				end else if (board[2] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[2] == 2'b11) begin
+				end else if (board[2] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -152,11 +152,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[3] == 2'b10) begin
+				end else if (board[3] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[3] == 2'b11) begin
+				end else if (board[3] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -166,11 +166,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[4] == 2'b10) begin
+				end else if (board[4] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[4] == 2'b11) begin
+				end else if (board[4] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -180,11 +180,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[5] == 2'b10) begin
+				end else if (board[5] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[5] == 2'b11) begin
+				end else if (board[5] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -194,11 +194,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[6] == 2'b10) begin
+				end else if (board[6] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[6] == 2'b11) begin
+				end else if (board[6] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -208,11 +208,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[7] == 2'b10) begin
+				end else if (board[7] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[7] == 2'b11) begin
+				end else if (board[7] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
@@ -222,11 +222,11 @@ begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[8] == 2'b10) begin
+				end else if (board[8] == 2'b01) begin
 					red <= 4'h7;
 					green <= 4'h0;
 					blue <= 4'h0;
-				end else if (board[8] == 2'b11) begin
+				end else if (board[8] == 2'b10) begin
 					red <= 4'h0;
 					green <= 4'h0;
 					blue <= 4'h7;
