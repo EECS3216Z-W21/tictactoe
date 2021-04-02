@@ -49,8 +49,8 @@ module main(
 	reg [1:0] sq9 = 2'b00;
 
 	reg [1:0] board [8:0] = '{
-	2'b01,2'b00,2'b10,
-	2'b00,2'b10,2'b00,
+	2'b00,2'b00,2'b00,
+	2'b00,2'b00,2'b00,
 	2'b00,2'b00,2'b00}; 
 
 	reg [6:0] CheckState;
@@ -112,7 +112,7 @@ module main(
 		end
 		else if(pr_state == reset)
 		begin
-			CheckState <= 6'b1000000;
+			CheckState <= 6'b100000;
 		end
 		
 		
@@ -122,7 +122,7 @@ module main(
 		if(button_counter >= polling_rate) begin
 			if(!rst) begin
 				button_counter <= 0;
-				pr_state <= play;
+				pr_state <= reset;
 				player <= 0;
 				sq1 = 2'b00;
 				sq2 = 2'b00;
@@ -249,82 +249,83 @@ module main(
 						// is it really that stupid?
 						if(move == 9'b000000001) begin
 							if(player == 0) begin
-								sq1 <= '{2'b01};
+								sq1 = 2'b01;
 							end
 							else begin
-								sq1 <= '{2'b10};
+								sq1 <= 2'b10;
 							end
 						end
 						else if(move == 9'b000000010) begin
 							if(player == 0) begin
-								sq2 <= '{2'b01};
+								sq2 <= 2'b01;
 							end
 							else begin
-								sq2 <= '{2'b10};
+								sq2 <= 2'b10;
 							end
 						end
 						else if(move == 9'b000000100) begin
 							if(player == 0) begin
-								sq3 <= '{2'b01};
+								sq3 <= 2'b01;
 							end
 							else begin
-								sq3 <= '{2'b10};
+								sq3 <= 2'b10;
 							end
 						end
 						else if(move == 9'b000001000) begin
 							if(player == 0) begin
-								sq4 <= '{2'b01};
+								sq4 <= 2'b01;
 							end
 							else begin
-								sq4 <= '{2'b10};
+								sq4 <= 2'b10;
 							end
 						end
 						else if(move == 9'b000010000) begin
 							if(player == 0) begin
-								sq5 <= '{2'b01};
+								sq5 <= 2'b01;
 							end
 							else begin
-								sq5 <= '{2'b10};
+								sq5 <= 2'b10;
 							end
 						end
 						else if(move == 9'b000100000) begin
 							if(player == 0) begin
-								sq6 <= '{2'b01};
+								sq6 <= 2'b01;
 							end
 							else begin
-								sq6 <= '{2'b10};
+								sq6 <= 2'b10;
 							end
 						end
 						else if(move == 9'b001000000) begin
 							if(player == 0) begin
-								sq7 <= '{2'b01};
+								sq7 <= 2'b01;
 							end
 							else begin
-								sq7 <= '{2'b10};
+								sq7 <= 2'b10;
 							end
 						end
 						else if(move == 9'b010000000) begin
 							if(player == 0) begin
-								sq8 <= '{2'b01};
+								sq8 <= 2'b01;
 							end
 							else begin
-								sq8 <= '{2'b10};
+								sq8 <= 2'b10;
 							end
 						end
 						else if(move == 9'b100000000) begin
 							if(player == 0) begin
-								sq9 <= '{2'b01};
+								sq9 <= 2'b01;
 							end
 							else begin
-								sq9 <= '{2'b10};
+								sq9 <= 2'b10;
 							end
 						end
 						player <= 1 - player;
 						pr_state <= checkWin;
 
 					end
-					pr_state <= play;
-					
+					else begin
+						pr_state <= play;
+					end
 				end
 				checkWin: begin
 					//checkWin
@@ -374,6 +375,9 @@ module main(
 			 
 					//back to play
 					pr_state <= play;
+				end
+				default: begin
+					CheckState <= 6'b010000;
 				end
 			endcase	
 		end
