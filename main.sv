@@ -111,12 +111,11 @@ module main(
 					if(is_valid(move, board)) begin 
 						if(player == 0) begin
 							board[nine_to_four(move)] <= '{2'b01};
-							$display("player 1");
 						end
 						else begin
 							board[nine_to_four(move)] <= '{2'b10};
-							$display("player 2");
 						end
+						player <= 1 - player;
 						nx_state <= checkWin;
 					end
 				end
