@@ -34,13 +34,24 @@ module main(
 	wire rst = KEY[1];
 	
 	wire [6:0] out1 = HEX0[6:0];
-   wire [6:0] out2 = HEX1[6:0];
+  	wire [6:0] out2 = HEX1[6:0];
 	
-	
+
+
+	reg [1:0] sq1 = 2'b00;
+	reg [1:0] sq2 = 2'b00;
+	reg [1:0] sq3 = 2'b00;
+	reg [1:0] sq4 = 2'b00;
+	reg [1:0] sq5 = 2'b00;
+	reg [1:0] sq6 = 2'b00;
+	reg [1:0] sq7 = 2'b00;
+	reg [1:0] sq8 = 2'b00;
+	reg [1:0] sq9 = 2'b00;
+
 	reg [1:0] board [8:0] = '{
-		2'b01,2'b00,2'b10,
-		2'b00,2'b10,2'b00,
-		2'b00,2'b00,2'b00}; 
+	2'b01,2'b00,2'b10,
+	2'b00,2'b10,2'b00,
+	2'b00,2'b00,2'b00}; 
 
 	reg [6:0] CheckState;
 
@@ -113,10 +124,15 @@ module main(
 				button_counter <= 0;
 				pr_state <= play;
 				player <= 0;
-				board <= '{
-					2'b00,2'b00,2'b00,
-					2'b00,2'b00,2'b00,
-					2'b00,2'b00,2'b00};
+				sq1 = 2'b00;
+				sq2 = 2'b00;
+				sq3 = 2'b00;
+				sq4 = 2'b00;
+				sq5 = 2'b00;
+				sq6 = 2'b00;
+				sq7 = 2'b00;
+				sq8 = 2'b00;
+				sq9 = 2'b00;	
 			end
 			if(!select) begin
 				// when button is pressed, the next frame will
@@ -129,39 +145,13 @@ module main(
 	
 		// frame rate related logic
 		counter <= counter + 1;
+
+		board = '{
+			sq1,sq2,sq3,
+			sq4,sq5,sq6,
+			sq7,sq8,sq9}; 
 		
-		
-		if(move == 9'b000000001) begin
-			nine_to_four <= 4'd0;
-		end
-		else if(move == 9'b000000010) begin
-			nine_to_four <= 4'd1;
-		end
-		else if(move == 9'b000000100) begin
-			nine_to_four <= 4'd2;
-		end
-		else if(move == 9'b000001000) begin
-			nine_to_four <= 4'd3;
-		end
-		else if(move == 9'b000010000) begin
-			nine_to_four <= 4'd4;
-		end
-		else if(move == 9'b000100000) begin
-			nine_to_four <= 4'd5;
-		end
-		else if(move == 9'b001000000) begin
-			nine_to_four <= 4'd6;
-		end
-		else if(move == 9'b010000000) begin
-			nine_to_four <= 4'd7;
-		end
-		else if(move == 9'b100000000) begin
-			nine_to_four <= 4'd8;
-		end
-		
-		
-		
-		
+
 		// 00 <= nobody won
 		// 01 <= player 1 win
 		// 10 <= player 2 win
@@ -205,6 +195,10 @@ module main(
 			 begin
 					check_win <= board[2];
 			 end
+		else	
+			begin
+				check_win <= 2'b00;
+			end
 			 
 			 
 		if(move == 9'b000000001) begin
@@ -246,18 +240,84 @@ module main(
 			// state logic
 			case(pr_state)
 				play: begin
-					//user input
-					//TODO
-					
+					// holding state
 				end
 				checkMove: begin
-					//check valid location
-					if (1) begin 
-						if(player == 0) begin
-							board[nine_to_four] <= '{2'b01};
+					// check valid location
+					if (is_valid) begin
+						// if it's stupid and it works,
+						// is it really that stupid?
+						if(move == 9'b000000001) begin
+							if(player == 0) begin
+								sq1 <= '{2'b01};
+							end
+							else begin
+								sq1 <= '{2'b10};
+							end
 						end
-						else begin
-							board[nine_to_four] <= '{2'b10};
+						else if(move == 9'b000000010) begin
+							if(player == 0) begin
+								sq2 <= '{2'b01};
+							end
+							else begin
+								sq2 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b000000100) begin
+							if(player == 0) begin
+								sq3 <= '{2'b01};
+							end
+							else begin
+								sq3 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b000001000) begin
+							if(player == 0) begin
+								sq4 <= '{2'b01};
+							end
+							else begin
+								sq4 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b000010000) begin
+							if(player == 0) begin
+								sq5 <= '{2'b01};
+							end
+							else begin
+								sq5 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b000100000) begin
+							if(player == 0) begin
+								sq6 <= '{2'b01};
+							end
+							else begin
+								sq6 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b001000000) begin
+							if(player == 0) begin
+								sq7 <= '{2'b01};
+							end
+							else begin
+								sq7 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b010000000) begin
+							if(player == 0) begin
+								sq8 <= '{2'b01};
+							end
+							else begin
+								sq8 <= '{2'b10};
+							end
+						end
+						else if(move == 9'b100000000) begin
+							if(player == 0) begin
+								sq9 <= '{2'b01};
+							end
+							else begin
+								sq9 <= '{2'b10};
+							end
 						end
 						player <= 1 - player;
 						pr_state <= checkWin;
@@ -279,12 +339,10 @@ module main(
 							pr_state <= p1Win;
 						end
 						2'b10: begin
-							pr_state <= p2Win;
-							
+							pr_state <= p2Win;	
 						end
 						2'b11: begin
 							pr_state <= tie;
-							
 						end
 					endcase 
 				end
