@@ -1,12 +1,12 @@
 //Part 1: Module header:
 module main(
 	// , output logic z
+	input [8:0] SW,
 	input MAX10_CLK1_50,
-   	input KEY[2],
-   	output [3:0] VGA_B, VGA_G, VGA_R,
-   	output VGA_HS, VGA_VS,
-	input select, rst,
-	input reg [8:0]move,
+   input KEY[2],
+   output [3:0] VGA_B, VGA_G, VGA_R,
+   output VGA_HS, VGA_VS,
+	
     output [6:0] out1,
     output [6:0] out2
     );
@@ -28,6 +28,12 @@ module main(
 	//01 => player 1
 	//10 => player 2
 	//11 => unused
+	
+	wire [8:0]move = SW[8:0];
+	wire select = KEY[0];
+	wire rst = KEY[1];
+	
+	
 	reg [1:0] board [8:0] = '{
 		2'b00,2'b00,2'b00,
 		2'b00,2'b00,2'b00,
@@ -64,6 +70,8 @@ module main(
 		// negedge triggering the rst doesn't work too well
 		// better to simply poll every ms and let the state transition
 		// at the next frame
+		
+		$display("player 1");
 		if(button_counter >= polling_rate) begin
 			if(!rst) begin
 				button_counter <= 0;
@@ -103,9 +111,11 @@ module main(
 					if(is_valid(move, board)) begin 
 						if(player == 0) begin
 							board[nine_to_four(move)] <= '{2'b01};
+							$display("player 1");
 						end
 						else begin
 							board[nine_to_four(move)] <= '{2'b10};
+							$display("player 2");
 						end
 						nx_state <= checkWin;
 					end
@@ -173,6 +183,8 @@ module main(
     .locked());
 
     
+	 wire VGARST;
+	 
     vga_controller vga_ins(.iRST_n(KEY[0]),
                         .iVGA_CLK(VGA_CTRL_CLK),
                         .board(board),

@@ -1,8 +1,4 @@
-module KeyPad (input Key[7:0], output  Board[8:0],output confirm)
-
-input Key[7:0];
-output Board[8:0];
-output confirm;
+module KeyPad (input Key[8:0], output  Board[8:0],output confirm);
 
 reg  loc[8:0];
 reg check;
