@@ -120,19 +120,13 @@ module main(
 		// better to simply poll every ms and let the state transition
 		// at the next frame
 		if(button_counter >= polling_rate) begin
+			button_counter <= 0;
 			if(!rst) begin
-				button_counter <= 0;
+				
 				pr_state <= reset;
-				player <= 0;
-				sq1 = 2'b00;
-				sq2 = 2'b00;
-				sq3 = 2'b00;
-				sq4 = 2'b00;
-				sq5 = 2'b00;
-				sq6 = 2'b00;
-				sq7 = 2'b00;
-				sq8 = 2'b00;
-				sq9 = 2'b00;	
+				wincounter1 <= 1'b0;
+				wincounter2 <= 1'b0;
+		
 			end
 			if(!select) begin
 				// when button is pressed, the next frame will
@@ -244,7 +238,7 @@ module main(
 				end
 				checkMove: begin
 					// check valid location
-					if (is_valid) begin
+					if (1==1) begin
 						// if it's stupid and it works,
 						// is it really that stupid?
 						if(move == 9'b000000001) begin
@@ -369,10 +363,20 @@ module main(
 					//reset board
                     if (wincounter1 >= 5'd9 || wincounter2 >= 5'd9)
 						begin
-						    wincounter1 <= 1'b0;
-							wincounter2 <= 1'b0;
+						wincounter1 <= 1'b0;
+						wincounter2 <= 1'b0;
+	
 						end
-			 
+					player <= 0;
+					sq1 = 2'b00;
+					sq2 = 2'b00;
+					sq3 = 2'b00;
+					sq4 = 2'b00;
+					sq5 = 2'b00;
+					sq6 = 2'b00;
+					sq7 = 2'b00;
+					sq8 = 2'b00;
+					sq9 = 2'b00;
 					//back to play
 					pr_state <= play;
 				end
