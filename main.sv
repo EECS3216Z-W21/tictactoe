@@ -6,17 +6,17 @@ module main(
    input KEY[2],
    output [3:0] VGA_B, VGA_G, VGA_R,
    output VGA_HS, VGA_VS,
-	
-    output [6:0] out1,
-    output [6:0] out2
-    );
+	 output [6:0] HEX0,
+	 output [6:0] HEX1,
+    output [9:0] LEDR
+	 );
 
 	//Part 2: Declarations:
 
 	//FSM-related declarations:
 	typedef enum logic [2:0] {play, checkMove, checkWin, p1Win, p2Win, tie, reset} state;
 	
-	state pr_state, nx_state;
+	state pr_state;
 
 
 	//this is a board made of 9 2-bit spaces 
@@ -33,12 +33,16 @@ module main(
 	wire select = KEY[0];
 	wire rst = KEY[1];
 	
+	wire [6:0] out1 = HEX0[6:0];
+   wire [6:0] out2 = HEX1[6:0];
+	
 	
 	reg [1:0] board [8:0] = '{
-		2'b00,2'b00,2'b00,
-		2'b00,2'b00,2'b00,
+		2'b01,2'b00,2'b10,
+		2'b00,2'b10,2'b00,
 		2'b00,2'b00,2'b00}; 
 
+	reg [6:0] CheckState;
 
 	reg player; //this is the current player
 	//0 => player 1
@@ -71,14 +75,43 @@ module main(
 	reg [1:0] check_win = 2'b0;
 	always @(posedge MAX10_CLK1_50) begin
 		button_counter <= button_counter + 1;
+		if(pr_state == play)
+		begin
+			CheckState <= 6'b0000001;
+		end
+		else if(pr_state == checkMove)
+		begin
+			CheckState <= 6'b0000010;
+		end
+		else if(pr_state == checkWin)
+		begin
+			CheckState <= 6'b0000100;
+		end
+		else if(pr_state == p1Win)
+		begin
+			CheckState <= 6'b0001000;
+		end
+		else if(pr_state == p2Win)
+		begin
+			CheckState <= 6'b0010000;
+		end
+		else if(pr_state == tie)
+		begin
+			CheckState <= 6'b0100000;
+		end
+		else if(pr_state == reset)
+		begin
+			CheckState <= 6'b1000000;
+		end
+		
+		
 		// negedge triggering the rst doesn't work too well
 		// better to simply poll every ms and let the state transition
 		// at the next frame
-	
 		if(button_counter >= polling_rate) begin
 			if(!rst) begin
 				button_counter <= 0;
-				nx_state <= play;
+				pr_state <= play;
 				player <= 0;
 				board <= '{
 					2'b00,2'b00,2'b00,
@@ -88,7 +121,7 @@ module main(
 			if(!select) begin
 				// when button is pressed, the next frame will
 				// check if the move is valid
-				nx_state <= checkMove;
+				pr_state <= checkMove;
 			end
 		end
 		
@@ -99,32 +132,33 @@ module main(
 		
 		
 		if(move == 9'b000000001) begin
-			nine_to_four <= 4'b0000;
+			nine_to_four <= 4'd0;
 		end
 		else if(move == 9'b000000010) begin
-			nine_to_four <= 4'b0001;
+			nine_to_four <= 4'd1;
 		end
 		else if(move == 9'b000000100) begin
-			nine_to_four <= 4'b0010;
+			nine_to_four <= 4'd2;
 		end
 		else if(move == 9'b000001000) begin
-			nine_to_four <= 4'b0011;
+			nine_to_four <= 4'd3;
 		end
 		else if(move == 9'b000010000) begin
-			nine_to_four <= 4'b0100;
+			nine_to_four <= 4'd4;
 		end
 		else if(move == 9'b000100000) begin
-			nine_to_four <= 4'b0101;
+			nine_to_four <= 4'd5;
 		end
 		else if(move == 9'b001000000) begin
-			nine_to_four <= 4'b0110;
+			nine_to_four <= 4'd6;
 		end
 		else if(move == 9'b010000000) begin
-			nine_to_four <= 4'b0111;
+			nine_to_four <= 4'd7;
 		end
 		else if(move == 9'b100000000) begin
-			nine_to_four <= 4'b1000;
+			nine_to_four <= 4'd8;
 		end
+		
 		
 		
 		
@@ -205,7 +239,6 @@ module main(
 		end
 
 
-		pr_state <= nx_state;
 		if (counter >= clocks_per_frame) begin
 			counter <= 0;
 			
@@ -215,11 +248,11 @@ module main(
 				play: begin
 					//user input
 					//TODO
-					nx_state <= play;
+					
 				end
 				checkMove: begin
 					//check valid location
-					if (is_valid) begin 
+					if (1) begin 
 						if(player == 0) begin
 							board[nine_to_four] <= '{2'b01};
 						end
@@ -227,9 +260,11 @@ module main(
 							board[nine_to_four] <= '{2'b10};
 						end
 						player <= 1 - player;
-						nx_state <= checkWin;
+						pr_state <= checkWin;
 
 					end
+					pr_state <= play;
+					
 				end
 				checkWin: begin
 					//checkWin
@@ -238,16 +273,18 @@ module main(
 					//if win, go to respective win state
 					case(check_win)
 						2'b00: begin
-							nx_state <= play;
+							pr_state <= play;
 						end
 						2'b01: begin
-							nx_state <= p1Win;
+							pr_state <= p1Win;
 						end
 						2'b10: begin
-							nx_state <= p2Win;
+							pr_state <= p2Win;
+							
 						end
 						2'b11: begin
-							nx_state <= tie;
+							pr_state <= tie;
+							
 						end
 					endcase 
 				end
@@ -255,19 +292,19 @@ module main(
 					//player 1 wins
 					wincounter1 <= wincounter1 + 1'b1;
 					//-> reset board
-					nx_state <= reset;
+					pr_state <= reset;
 				end
 				p2Win: begin
 					//player 2 wins
 					 wincounter2 <= wincounter2 + 1'b1;
 					//-> reset board
-					nx_state <= reset;
+					pr_state <= reset;
 				end
 				tie: begin
 					//tie
 			 
 					//-> reset board
-					nx_state <= reset;
+					pr_state <= reset;
 				end
 				reset: begin
 					//reset board
@@ -278,7 +315,7 @@ module main(
 						end
 			 
 					//back to play
-					nx_state <= play;
+					pr_state <= play;
 				end
 			endcase	
 		end
@@ -296,7 +333,7 @@ module main(
     
 	 wire VGARST;
 	 
-    vga_controller vga_ins(.iRST_n(KEY[0]),
+    vga_controller vga_ins(.iRST_n(1),
                         .iVGA_CLK(VGA_CTRL_CLK),
                         .board(board),
                         .oHS(VGA_HS),
@@ -306,5 +343,7 @@ module main(
                         .oVGA_R(VGA_R)); 
 
     SSLED(wincounter1, out1); // player 1
-    SSLED(wincounter2, out2); // player 2                       
+    SSLED(wincounter2, out2); // player 2
+	 assign LEDR[6:0] = CheckState[6:0]; 
+	 
 endmodule
