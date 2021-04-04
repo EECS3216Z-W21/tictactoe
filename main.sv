@@ -14,7 +14,7 @@ module main(
 	//Part 2: Declarations:
 
 	//FSM-related declarations:
-	typedef enum logic [2:0] {play, checkMove, checkWin, p1Win, p2Win, tie, reset} state;
+	typedef enum logic [2:0] {play, buttonBuffer, checkMove, checkWin, p1Win, p2Win, tie, reset} state;
 	
 	state pr_state;
 
@@ -131,7 +131,7 @@ module main(
 			if(!select) begin
 				// when button is pressed, the next frame will
 				// check if the move is valid
-				pr_state <= checkMove;
+				pr_state <= buttonBuffer;
 			end
 		end
 		
@@ -235,6 +235,13 @@ module main(
 			case(pr_state)
 				play: begin
 					// holding state
+				end
+				buttonBuffer: begin
+					// buffer a button press to ensure
+					// a press is registered once
+					if (select) begin
+						pr_state <= checkMove;
+					end
 				end
 				checkMove: begin
 					// check valid location
