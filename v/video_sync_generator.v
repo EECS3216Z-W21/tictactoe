@@ -1,5 +1,5 @@
 // Code adapted from DE-10 Lite demonstration code.
-// Modified by Adam Silverman and Tuan Dau, 2020.
+// Modified by Adam Silverman
 
 module video_sync_generator(reset,
                             vga_clk,
@@ -64,7 +64,7 @@ parameter vert_back  = 34;
 parameter vert_front = 11;
 parameter H_sync_cycle = 96;
 parameter V_sync_cycle = 2;
-parameter H_BLANK = hori_front+H_sync_cycle ; //add by yang
+parameter H_BLANK = hori_front+H_sync_cycle ; 
 
 //////////////////////////
 reg [10:0] h_cnt;
