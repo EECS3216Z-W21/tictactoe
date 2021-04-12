@@ -1,9 +1,10 @@
 //Part 1: Module header:
 module main(
 	// , output logic z
+	//input [7:0] ARDUINO_IO,
 	input [8:0] SW,
 	input MAX10_CLK1_50,
-   input KEY[2],
+	input KEY[1:0],
    output [3:0] VGA_B, VGA_G, VGA_R,
    output VGA_HS, VGA_VS,
 	 output [6:0] HEX0,
@@ -28,7 +29,11 @@ module main(
 	//01 => player 1
 	//10 => player 2
 	//11 => unused
+
 	
+	
+	//wire [8:0]move = SW[8:0];
+	//wire select = KEY[0];
 	wire [8:0]move = SW[8:0];
 	wire select = KEY[0];
 	wire rst = KEY[1];
@@ -84,6 +89,10 @@ module main(
 	reg is_valid = 1'b0;
 	reg [3:0] nine_to_four = 4'b0;
 	reg [1:0] check_win = 2'b0;
+	
+	
+	//KeyPad( ARDUINO_IO[7:0],move[8:0]);
+	
 	always @(posedge MAX10_CLK1_50) begin
 		button_counter <= button_counter + 1;
 		if(pr_state == play)
@@ -195,37 +204,38 @@ module main(
 			end
 			 
 			 
-		if(move == 9'b000000001) begin
-			is_valid <= board[0] == 2'b00;
-		end
-		else if(move == 9'b000000010) begin
-			is_valid <= board[1] == 2'b00;
-		end
-		else if(move == 9'b000000100) begin
-			is_valid <= board[2] == 2'b00;
-		end
-		else if(move == 9'b000001000) begin
-			is_valid <= board[3] == 2'b00;
-		end
-		else if(move == 9'b000010000) begin
-			is_valid <= board[4] == 2'b00;
-		end
-		else if(move == 9'b000100000) begin
-			is_valid <= board[5] == 2'b00;
-		end
-		else if(move == 9'b001000000) begin
-			is_valid <= board[6] == 2'b00;
-		end
-		else if(move == 9'b010000000) begin
-			is_valid <= board[7] == 2'b00;
-		end
-		else if(move == 9'b100000000) begin
-			is_valid <= board[8] == 2'b00;
-		end
-		else begin
-			is_valid <= 0;
-		end
-
+		case(move)
+            9'b000000001: begin
+                is_valid <= sq1 == 2'b00;    
+            end
+            9'b000000010: begin
+                is_valid <= sq2 == 2'b00;    
+            end
+            9'b000000100: begin
+                is_valid <= sq3 == 2'b00;    
+            end
+            9'b000001000: begin
+                is_valid <= sq4 == 2'b00;    
+            end
+            9'b000010000: begin
+                is_valid <= sq5 == 2'b00;    
+            end
+            9'b000100000: begin
+                is_valid <= sq6 == 2'b00;    
+            end
+            9'b001000000: begin
+                is_valid <= sq7 == 2'b00;    
+            end
+            9'b010000000: begin
+                is_valid <= sq8 == 2'b00;    
+            end
+            9'b100000000: begin
+                is_valid <= sq9 == 2'b00;    
+            end
+            default: begin
+                is_valid <= 0;
+            end
+        endcase
 
 		if (counter >= clocks_per_frame) begin
 			counter <= 0;
@@ -245,7 +255,7 @@ module main(
 				end
 				checkMove: begin
 					// check valid location
-					if (1==1) begin
+					if (is_valid) begin
 						// if it's stupid and it works,
 						// is it really that stupid?
 						if(move == 9'b000000001) begin
@@ -370,8 +380,8 @@ module main(
 					//reset board
                     if (wincounter1 >= 5'd9 || wincounter2 >= 5'd9)
 						begin
-						wincounter1 <= 1'b0;
-						wincounter2 <= 1'b0;
+						//wincounter1 <= 1'b0;
+						//wincounter2 <= 1'b0;
 	
 						end
 					player <= 0;
@@ -415,8 +425,46 @@ module main(
                         .oVGA_G(VGA_G),
                         .oVGA_R(VGA_R)); 
 
-    SSLED(wincounter1, out1); // player 1
-    SSLED(wincounter2, out2); // player 2
+    SSLED(wincounter1, HEX0); // player 1
+    SSLED(wincounter2, HEX1); // player 2
 	 assign LEDR[6:0] = CheckState[6:0]; 
 	 
+endmodule
+
+module SSLED(x,y);
+
+	input [3:0] x;
+	output [6:0] y;
+	
+	assign y[0] = ~(x[1]&x[2] | x[1]&~x[2]&~x[3] | ~x[0]&~x[1]&~x[2] | x[0]&~x[1]&x[2]&~x[3] | x[0]&~x[1]&~x[2]&x[3] | x[0]&~x[1]&~x[2]&x[3] | ~x[0]&~x[1]&x[2]&x[3] | ~x[0]&x[1]&~x[2]&x[3]);
+	assign y[1] = ~(~x[1]&~x[2]&~x[3] | x[1]&~x[2]&~x[3] | x[0]&~x[1]&x[3] | x[0]&x[1]&x[2]&~x[3] | ~x[0]&~x[2]&x[3] | ~x[0]&~x[1]&x[2]&~x[3]);
+	assign y[2] = ~(~x[1]&~x[2]&~x[3] | x[0]&x[1]&~x[2] | x[2]&~x[3] | ~x[1]&~x[2]&x[3] | ~x[0]&x[1]&~x[2]&x[3] | x[0]&~x[1]&x[2]&x[3]);
+	assign y[3] = ~(~x[0]&~x[2]&~x[3] | x[0]&x[1]&~x[2] | x[0]&~x[1]&x[2] | ~x[0]&x[1]&x[2] | ~x[1]&~x[2]&x[3] | ~x[0]&~x[1]&x[2]&x[3]);
+	assign y[4] = ~(~x[0]&~x[2]&~x[3] | x[0]&~x[1]&x[2]&x[3] | ~x[0]&x[1]&x[2] | ~x[0]&~x[2]&x[3] | x[0]&x[1]&x[3] | ~x[0]&~x[1]&x[2]&x[3] );
+
+	assign y[5] = ~(~x[0]&~x[1]&~x[3] | ~x[0]&x[1]&x[2] | ~x[2]&x[3] | ~x[0]&x[2]&x[3] | x[0]&x[1]&x[2]&x[3]| x[0]&~x[1]&x[2]&~x[3]);
+	assign y[6] = ~(x[1]&~x[2]| ~x[1]&x[2]&~x[3] | ~x[1]&~x[2]&x[3] | x[0]&x[2]&x[3] | ~x[0]&x[1]&x[2]);
+
+endmodule
+
+
+module KeyPad ( Key, Board);
+
+input [7:0] Key;
+output [8:0] Board;
+
+//Wire [3:0] ROW;
+
+
+assign Board[0] = ~Key[7]&~Key[3]; //3
+assign Board[1] = ~Key[7]&~Key[2]; //2
+assign Board[2] = ~Key[7]&~Key[1]; //1
+assign Board[3] = ~Key[6]&~Key[3];
+assign Board[4] = ~Key[6]&~Key[2];
+assign Board[5] = ~Key[6]&~Key[1];
+assign Board[6] = ~Key[5]&~Key[3];
+assign Board[7] = ~Key[5]&~Key[2];
+assign Board[8] = ~Key[5]&~Key[1];
+//assign confirm = (~Key[4]&Key[1]);
+
 endmodule
